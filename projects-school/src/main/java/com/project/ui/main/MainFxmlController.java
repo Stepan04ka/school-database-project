@@ -1,3 +1,7 @@
+/*
+  Symbol '*' means - need's to be replaced
+*/
+
 package com.project.ui.main;
 
 import javafx.event.ActionEvent;
@@ -6,12 +10,18 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.input.DragEvent;
 
 import com.project.db.DatabaseConnection;
 import com.project.obj.Device;
 
+// need to be deleted
 import java.util.List;
 import java.util.ArrayList;
+
+// and replaced with this JavaFX collections
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class MainFxmlController {
 
@@ -97,6 +107,7 @@ public class MainFxmlController {
                 ")"
             );
             testDevice =  new Device(idField.getText(), nameField.getText(), typeField.getText());
+            // **
             deviceList.add(idField.getText(), testDevice); 
             
     	}
@@ -113,12 +124,15 @@ public class MainFxmlController {
             showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Поле idField - пустое! Заполните поле ID - обязательно!");
         } else if (typeFieldNull() && !idFieldNull() && !nameFieldNull()) {
             databaseConnection.makeQuery("UPDATE pcinfo SET name = " + nameField.getText() + " WHERE id = " + idField.getText());
+            // **
             deviceList.set(idField.getText(), new Device(testDevice.getId(),testDevice.setName(nameField.getText()),testDevice.getType());
         } else if (nameFieldNull() && !typeFieldNull() && !idFieldNull()) {
             databaseConnection.makeQuery("UPDATE pcinfo SET type = " + typeField.getText() + " WHERE id = " + idField.getText());
+            // **
             deviceList.set(idField.getText(), new Device(testDevice.getId(),testDevice.getName(),testDevice.setType(typeField.getText())));
         } else {
             databaseConnection.makeQuery("UPDATE pcinfo SET name = " + nameField.getText() + ",type = " + typeField.getText() + " WHERE id = " + idField.getText());
+            // **
             deviceList.set(idField.getText(),new Device(idField.getText(), nameField.getText(), typeField.getText()));
         }
         System.out.println("Выбранное успешно обновилось!");
