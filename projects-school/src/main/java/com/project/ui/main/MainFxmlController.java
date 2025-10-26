@@ -57,7 +57,7 @@ public class MainFxmlController {
                 "type VARCHAR(55) NOT NULL" +
                 ")"
         );
-        System.out.println("База данных була успешно инциализирована!");
+        System.out.println("База данных была успешно инциализирована!");
     }
 
     public boolean fieldsAreNull() {
@@ -112,7 +112,7 @@ public class MainFxmlController {
             
     	}
 
-        System.out.println("Выбранное успешно добавилось!");
+        System.out.println("Вписанные вами поля успешно добавились!");
         databaseConnection.closeResources();
     }
 
@@ -135,7 +135,7 @@ public class MainFxmlController {
             // **
             deviceList.set(idField.getText(),new Device(idField.getText(), nameField.getText(), typeField.getText()));
         }
-        System.out.println("Выбранное успешно обновилось!");
+        System.out.println("Выбранные вами поля успешно обновились!");
         databaseConnection.closeResources();
     }
 
@@ -145,10 +145,10 @@ public class MainFxmlController {
 
         if (idFieldNull()) {
             showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Поле idField - пустое! Заполните поле ID - обязательно!");
-        } else if () {
+        } else if (!idFieldNull() && typeFieldNull() && nameFieldNull()) {
             databaseConnection.makeQuery("DELETE * FROM pcinfo WHERE id = " + idField.getText());
         }
-        System.out.println("Выбранное успешно удалилось!");
+        System.out.println("Выбранные вами поля успешно удалилось!");
         databaseConnection.closeResources();
     }
 
