@@ -1,5 +1,6 @@
 /*
-  Symbol '*' means - need's to be replaced
+  Symbol '*' means - need's to be replaced.
+  Last file change: 13:28, 27th October 2025 year.
 */
 
 package com.project.ui.main;
@@ -9,17 +10,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.DragEvent;
 
 import com.project.db.DatabaseConnection;
 import com.project.obj.Device;
 
-// need to be deleted
-import java.util.List;
-import java.util.ArrayList;
-
-// and replaced with this JavaFX collections
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -38,14 +36,49 @@ public class MainFxmlController {
     private TextField idField;
 
     @FXML
+    private TableView<Device> table;
+
+    @FXML
+    private TableColumn<Device, String> nameColumn;
+
+    @FXML
+    private TableColumn<Device, String> idColumn;
+
+    @FXML
+    private TableColumn<Device, String> typeColumn;
+
+    @FXML
     private TextField nameField;
 
     @FXML
     private TextField typeField;
 
     private DatabaseConnection databaseConnection = new DatabaseConnection();
-    private List<String, Device> deviceList = new ArrayList<>();
+    private ObservableList<String, Device> deviceList = FXCollections.observableArrayList();
     private Device testDevice = new Device();
+
+    public void updateTable() {
+        table = new TableView<Device>(deviceList);
+
+        nameColumn = new TableColumn<Device, String>("Name");
+        idColumn = new TableColumn<Device, String>("ID");
+        typeColumn = new TableColumn<Device, String>("Type");
+
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+
+        table.getColumns().addAll(nameColumn, idColumn, typeColumn);
+        table.setItems(deviceList);
+    }
+
+    public void cleanTable() {
+        table = null;
+        nameColumn = null;
+        idColumn = null;
+        typeColumn = null;
+    }
+
 
     public void intializeDatabase() {
         databaseConnection.openConnection();
@@ -91,6 +124,8 @@ public class MainFxmlController {
     @FXML
     protected void onAddButtonClick(ActionEvent event) {
         intializeDatabase();
+        cleanTable();
+
     	if (fieldsAreNull()) {
     		showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Все поля с вводом информации пустые!");
     	} else if (idFieldNull() && nameFieldNull() || !typeFieldNull()) {
@@ -107,11 +142,10 @@ public class MainFxmlController {
                 ")"
             );
             testDevice =  new Device(idField.getText(), nameField.getText(), typeField.getText());
-            // **
             deviceList.add(idField.getText(), testDevice); 
             
     	}
-
+        updateTable();
         System.out.println("Вписанные вами поля успешно добавились!");
         databaseConnection.closeResources();
     }
@@ -119,22 +153,21 @@ public class MainFxmlController {
     @FXML
     protected void onChangeButtonClick(ActionEvent event) {
         intializeDatabase();
+        cleanTable();
 
         if (idFieldNull()) {
             showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Поле idField - пустое! Заполните поле ID - обязательно!");
         } else if (typeFieldNull() && !idFieldNull() && !nameFieldNull()) {
             databaseConnection.makeQuery("UPDATE pcinfo SET name = " + nameField.getText() + " WHERE id = " + idField.getText());
-            // **
             deviceList.set(idField.getText(), new Device(testDevice.getId(),testDevice.setName(nameField.getText()),testDevice.getType());
         } else if (nameFieldNull() && !typeFieldNull() && !idFieldNull()) {
             databaseConnection.makeQuery("UPDATE pcinfo SET type = " + typeField.getText() + " WHERE id = " + idField.getText());
-            // **
             deviceList.set(idField.getText(), new Device(testDevice.getId(),testDevice.getName(),testDevice.setType(typeField.getText())));
         } else {
             databaseConnection.makeQuery("UPDATE pcinfo SET name = " + nameField.getText() + ",type = " + typeField.getText() + " WHERE id = " + idField.getText());
-            // **
             deviceList.set(idField.getText(),new Device(idField.getText(), nameField.getText(), typeField.getText()));
         }
+        updateTable();
         System.out.println("Выбранные вами поля успешно обновились!");
         databaseConnection.closeResources();
     }
@@ -142,12 +175,14 @@ public class MainFxmlController {
     @FXML
     protected void onDeleteButtonClick(ActionEvent event) {
         intializeDatabase();
+        cleanTable();
 
         if (idFieldNull()) {
             showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Поле idField - пустое! Заполните поле ID - обязательно!");
         } else if (!idFieldNull() && typeFieldNull() && nameFieldNull()) {
             databaseConnection.makeQuery("DELETE * FROM pcinfo WHERE id = " + idField.getText());
         }
+        updateTable();
         System.out.println("Выбранные вами поля успешно удалилось!");
         databaseConnection.closeResources();
     }
