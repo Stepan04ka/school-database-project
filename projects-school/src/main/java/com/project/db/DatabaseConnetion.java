@@ -33,7 +33,7 @@ public class DatabaseConnection {
 			statement.executeUpdate(sql);
 			System.out.println("Запрос был совершен успешно!");
 		} catch (SQLException e) {
-
+			e.printStackTrace();
 		}
 	}
 
