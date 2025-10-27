@@ -13,7 +13,7 @@ public class DatabaseConnection {
 	public void openConnetion() {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
-			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/testingdb","","12345");
+			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/testingdb","root","12345");
 			System.out.println("Соединение с базой данных было открыто!");
 		} catch (SQLException e) {
 			e.printStackTrace();
