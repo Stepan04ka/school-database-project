@@ -14,6 +14,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.DragEvent;
+import javafx.scene.control.Hyperlink;
 
 import com.project.db.DatabaseConnection;
 import com.project.obj.Device;
@@ -33,6 +34,9 @@ public class MainFxmlController {
     private Button deleteButton;
 
     @FXML
+    private Hyperlink closeDbConnectionLink;
+
+    @FXML
     private TextField idField;
 
     @FXML
@@ -46,6 +50,8 @@ public class MainFxmlController {
 
     @FXML
     private TableColumn<Device, String> typeColumn;
+
+
 
     @FXML
     private TextField nameField;
@@ -94,7 +100,7 @@ public class MainFxmlController {
     }
 
     public boolean fieldsAreNull() {
-    	if (idField.getText().equals("") && nameField.getText().equals("") && typeField.getText().equals("")) return true;
+    	if (idFieldNull() && nameFieldNull() && typeFieldNull()) return true;
     	return false;
     }
 
@@ -112,6 +118,8 @@ public class MainFxmlController {
         if (idField.getText().equals("")) return true;
         return false;
     }
+
+
     protected void showPopUpWindow(AlertType alertType, String header, String title, String message) {
     	Alert alert = new Alert(alertType);
     	alert.setTitle(title);
@@ -128,13 +136,19 @@ public class MainFxmlController {
 
     	if (fieldsAreNull()) {
     		showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Все поля с вводом информации пустые!");
-    	} else if (idFieldNull() && nameFieldNull() || !typeFieldNull()) {
+    	} else if (idFieldNull() && nameFieldNull() && !typeFieldNull()) {
     		showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Поля: Name и ID - пустые!");
     	} else if (typeFieldNull() && nameFieldNull() && !idFieldNull()) {
     		showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Поля: Type и Name - пустые!");
-    	} else if (idFieldNull() && typeFieldNull() || !nameFieldNull())  {
+    	} else if (idFieldNull() && typeFieldNull() && !nameFieldNull())  {
     		showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Поля: Type и ID - пустые!");
-    	} else {
+    	} else if (idFieldNull() && !typeFieldNull() && !nameFieldNull()) {
+            showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Поле ID - пустое!");
+        } else if (nameFieldNull() && !idFieldNull() && !typeFieldNull()) {
+            showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Поле Name - пустое!");
+        } else if (typeFieldNull() && !idFieldNull() && !nameFieldNull()) {
+            showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Поле Type - Пустое!");
+        } else {
     		databaseConnection.makeQuery("INSERT INTO pcinfo VALUES (" + 
                 nameField.getText() +
                 "," +
@@ -145,6 +159,7 @@ public class MainFxmlController {
             deviceList.add(idField.getText(), testDevice); 
             
     	}
+
         updateTable();
         System.out.println("Вписанные вами поля успешно добавились!");
         databaseConnection.closeResources();
@@ -156,17 +171,20 @@ public class MainFxmlController {
         cleanTable();
 
         if (idFieldNull()) {
-            showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Поле idField - пустое! Заполните поле ID - обязательно!");
+            showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Поле ID - пустое! Заполните поле ID - обязательно!");
         } else if (typeFieldNull() && !idFieldNull() && !nameFieldNull()) {
             databaseConnection.makeQuery("UPDATE pcinfo SET name = " + nameField.getText() + " WHERE id = " + idField.getText());
             deviceList.set(idField.getText(), new Device(testDevice.getId(),testDevice.setName(nameField.getText()),testDevice.getType());
         } else if (nameFieldNull() && !typeFieldNull() && !idFieldNull()) {
             databaseConnection.makeQuery("UPDATE pcinfo SET type = " + typeField.getText() + " WHERE id = " + idField.getText());
             deviceList.set(idField.getText(), new Device(testDevice.getId(),testDevice.getName(),testDevice.setType(typeField.getText())));
+        } else if (fieldsAreNull()) {
+            showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Все поля пустые! Введите информацию в поля");
         } else {
             databaseConnection.makeQuery("UPDATE pcinfo SET name = " + nameField.getText() + ",type = " + typeField.getText() + " WHERE id = " + idField.getText());
             deviceList.set(idField.getText(),new Device(idField.getText(), nameField.getText(), typeField.getText()));
         }
+
         updateTable();
         System.out.println("Выбранные вами поля успешно обновились!");
         databaseConnection.closeResources();
@@ -178,13 +196,29 @@ public class MainFxmlController {
         cleanTable();
 
         if (idFieldNull()) {
-            showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Поле idField - пустое! Заполните поле ID - обязательно!");
-        } else if (!idFieldNull() && typeFieldNull() && nameFieldNull()) {
+            showPopUpWindow(AlertType.ERROR,"Упс!","Ошибка!","Поле ID - пустое! Заполните поле ID - обязательно!");
+        } else {
             databaseConnection.makeQuery("DELETE * FROM pcinfo WHERE id = " + idField.getText());
         }
+
         updateTable();
         System.out.println("Выбранные вами поля успешно удалилось!");
         databaseConnection.closeResources();
+    }
+
+    // Added for no reason :P
+    @FXML
+    protected void obDbConnectionCloseLinkClick(ActionEvent event) {
+        Alert alertNew = new Alert(AlertType.CONFIRMATION);
+        alertNew.setTitle("Подтверждение действий");
+        alertNew.setHeaderText("Вы уверены?");
+        alertNew.setContentText("Закрытие соединения с базой данных закроет программу.");
+        alertNew.showAndWait()
+            .filter(response -> response == ButtonType.OK)
+            .ifPresent(response -> {
+                databaseConnection.closeResources();
+                System.exit(0);
+            });
     }
 
 }
